@@ -8,6 +8,7 @@ namespace MaximalTourism
     public class MaximalTourism
     {
         IEnumerable<CityConnection> cityConnections;
+        int groupId;
 
         public MaximalTourism(string[] args)
         {
@@ -21,80 +22,81 @@ namespace MaximalTourism
 
         public int FindMaximumConnectedCities()
         {
-            var grouped = cityConnections
-                .GroupBy(cc => cc.First)
-                .OrderBy(gcc => gcc.Key)
-                .Select(gcc => new CityGroup()
-                {
-                    Key = gcc.Key,
-                    Connected = gcc.Select(cc => cc.Second).ToArray(),
-                    Processed = false,
-                })
-                .ToDictionary(gcc => gcc.Key, gcc => gcc);
-
-
             var workingSet = cityConnections
                 .GroupBy(cc => cc.First)
-                .ToDictionary(gcc => gcc.Key, gcc => new CityToProcess()
+                .ToDictionary(gcc => gcc.Key, gcc => new WorkingSetItem()
                 {
                     ConnectedCities = gcc.Select(s => s.Second).ToList()
                 });
 
-            foreach (var secondGroup in cityConnections.GroupBy(cc => cc.Second))
+            foreach (var reversedGroup in cityConnections.GroupBy(cc => cc.Second))
             {
-                if (workingSet.ContainsKey(secondGroup.Key))
+                if (workingSet.ContainsKey(reversedGroup.Key))
                 {
-                    workingSet[secondGroup.Key].ConnectedCities.AddRange(secondGroup.Select(sg => sg.First));
+                    workingSet[reversedGroup.Key].ConnectedCities.AddRange(reversedGroup.Select(sg => sg.First));
                 }
                 else
                 {
-                    workingSet[secondGroup.Key] = new CityToProcess()
+                    workingSet[reversedGroup.Key] = new WorkingSetItem()
                     {
-                        ConnectedCities = secondGroup.Select(sg => sg.First).ToList()
+                        ConnectedCities = reversedGroup.Select(sg => sg.First).ToList()
                     };
                 }
             }
 
+            ResetGroupId();
 
-
-            var connectedGroups = new List<int[]>();
-
-            foreach (var g in grouped)
+            foreach (var item in workingSet)
             {
-                if (g.Value.Processed)
+                if (HasBeenProcessed(item.Value))
                 {
                     continue;
                 }
 
-                var processingStack = new Stack<int>();
-                var connectedCities = new List<int>();
+                var groupId = FetchNewGroupId();
 
-                processingStack.Push(g.Key);
-                connectedCities.Add(g.Key);
+                var processingStack = new Stack<int>();
+                processingStack.Push(item.Key);
 
                 while (processingStack.Any())
                 {
-                    var currentCity = processingStack.Pop();
+                    var cityIndex = processingStack.Pop();
+                    var relatedItem = workingSet[cityIndex];
 
-                    if (grouped.ContainsKey(currentCity))
+                    if (HasBeenProcessed(relatedItem))
                     {
-                        var currentGroup = grouped[currentCity];
-                        if (!currentGroup.Processed)
-                        {
-                            currentGroup.Processed = true;
-                            connectedCities.AddRange(currentGroup.Connected);
-                            foreach (var c in currentGroup.Connected)
-                            {
-                                processingStack.Push(c);
-                            }
-                        }
+                        continue;
+                    }
+
+                    relatedItem.GroupId = groupId;
+
+                    foreach (var c1 in relatedItem.ConnectedCities)
+                    {
+                        processingStack.Push(c1);
                     }
                 }
-
-                connectedGroups.Add(connectedCities.Distinct().ToArray());
             }
 
-            return connectedGroups.Select(cg => cg.Length).Max();
+            var maxConnections = workingSet
+                .GroupBy(si => si.Value.GroupId, si => si.Key)
+                .Max(gsi => gsi.Count());
+
+            return maxConnections;
+        }
+
+        private void ResetGroupId()
+        {
+            groupId = 0;
+        }
+
+        private int FetchNewGroupId()
+        {
+            return ++groupId;
+        }
+
+        private bool HasBeenProcessed(WorkingSetItem city)
+        {
+            return city.GroupId != default;
         }
 
         private class CityConnection
@@ -132,24 +134,11 @@ namespace MaximalTourism
         }
 
 
-
-        private class CityGroup
-        {
-            public int Key { get; set; }
-            public int[] Connected { get; set; }
-            public bool Processed { get; set; }
-        }
-
-        private class CityToProcess
+        private class WorkingSetItem
         {
             public List<int> ConnectedCities;
             public int GroupId;
         }
 
-        public struct CityToProcessStruct
-        {
-            public int[] ConnectedCities;
-            public int GroupId;
-        }
     }
 }
