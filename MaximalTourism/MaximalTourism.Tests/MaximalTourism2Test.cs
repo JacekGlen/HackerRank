@@ -10,7 +10,7 @@ namespace MaximalTourism.Tests
     [TestFixture]
     public class MaximalTourism2Test
     {
-        public const int largeTestCount = 100000;
+        public const int largeTestCount = 150000;
 
         [Test]
         [TestCase(1, "1 1", 1)]
@@ -89,7 +89,6 @@ namespace MaximalTourism.Tests
             var input = new List<int[]>();
             input.Add(new int[] { 1, 2 });
             input.Add(new int[] { 1, 3 });
-
 
             var rand = new Random();
 

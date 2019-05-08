@@ -11,8 +11,8 @@ namespace MaximalTourism
         {
             int[] cityAssigment = new int[maxCities + 1];
 
-            Dictionary<int, int> groupCount = new Dictionary<int, int>();
-            Dictionary<int, int> groupParrent = new Dictionary<int, int>();
+            var groupCount = new List<int>(maxCities / 10) { 0 };
+            var groupParrent = new List<int>(maxCities / 10) { 0 };
 
             var newGroupId = 0;
 
@@ -27,8 +27,8 @@ namespace MaximalTourism
                     newGroupId++;
                     cityAssigment[cityA] = newGroupId;
                     cityAssigment[cityB] = newGroupId;
-                    groupCount[newGroupId] = cityA == cityB ? 1 : 2;
-                    groupParrent[newGroupId] = newGroupId;
+                    groupCount.Add(cityA == cityB ? 1 : 2);
+                    groupParrent.Add(newGroupId);
                     continue;
                 }
 
@@ -74,7 +74,7 @@ namespace MaximalTourism
                 groupParrent[parentGroupB] = parentGroupA;
             }
 
-            return groupCount.Values.Max();
+            return groupCount.Max();
         }
     }
 }
