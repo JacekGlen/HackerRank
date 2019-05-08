@@ -20,6 +20,11 @@ namespace MaximalTourism
             cityConnections = args.Select(a => new CityConnection(a)).ToList();
         }
 
+        public MaximalTourism(int [][] args)
+        {
+            cityConnections = args.Select(a => new CityConnection(a));
+        }
+
         public int FindMaximumConnectedCities()
         {
             var workingSet = cityConnections
@@ -130,6 +135,12 @@ namespace MaximalTourism
                     First = arg.Item2;
                     Second = arg.Item1;
                 }
+            }
+
+            public CityConnection(int[] arg)
+            {
+                First = arg[0];
+                Second = arg[1];
             }
         }
 

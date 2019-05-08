@@ -9,7 +9,7 @@ namespace MaximalTourism.Tests
     [TestFixture]
     public class MaximalTourismTest
     {
-        public const int largeTestCount = 100000;
+        public const int largeTestCount = 10000;
 
         [Test]
         [TestCase("1 1", 1)]
@@ -43,11 +43,31 @@ namespace MaximalTourism.Tests
         }
 
         [Test]
-        public void CalculatesAllConnected()
+        public void CalculatesAllConnectedUpwards()
         {
             List<Tuple<int, int>> cities = new List<Tuple<int, int>>();
 
             for (int i = 1; i <= largeTestCount; ++i)
+            {
+                cities.Add(new Tuple<int, int>(i, i + 1));
+            }
+
+            cities.Add(new Tuple<int, int>(largeTestCount + 2, largeTestCount + 3));
+
+            var sut = new MaximalTourism(cities);
+
+            var result = sut.FindMaximumConnectedCities();
+
+            Assert.AreEqual(largeTestCount + 1, result);
+        }
+
+
+        [Test]
+        public void CalculatesAllConnectedDownwards()
+        {
+            List<Tuple<int, int>> cities = new List<Tuple<int, int>>();
+
+            for (int i = largeTestCount; i >0 ; --i)
             {
                 cities.Add(new Tuple<int, int>(i, i + 1));
             }
