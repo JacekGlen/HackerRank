@@ -82,6 +82,15 @@ namespace MaximalTourism
                 }
             }
 
+            var citiesInMax = workingSet
+                .GroupBy(si => si.Value.GroupId, si => si.Key)
+                .OrderByDescending(gsi => gsi.Count())
+                .Take(1)
+                .Single()
+                .Select(s => s)
+                .ToArray();
+    
+
             var maxConnections = workingSet
                 .GroupBy(si => si.Value.GroupId, si => si.Key)
                 .Max(gsi => gsi.Count());

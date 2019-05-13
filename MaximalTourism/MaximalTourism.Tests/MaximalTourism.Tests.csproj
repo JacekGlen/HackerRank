@@ -7,6 +7,32 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="MaximalTourismSample_1.txt" />
+    <None Remove="MaximalTourismSample_1a.txt" />
+    <None Remove="MaximalTourismSample_1b.txt" />
+    <None Remove="MaximalTourismSample_1c.txt" />
+    <None Remove="MaximalTourismSample_1d.txt" />
+    <None Remove="MaximalTourismSample_1e.txt" />
+    <None Remove="MaximalTourismSample_1e_1.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="MaximalTourismSample_1e_1.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MaximalTourismSample_1e.txt" />
+    <Content Include="MaximalTourismSample_1d.txt" />
+    <Content Include="MaximalTourismSample_1c.txt" />
+    <Content Include="MaximalTourismSample_1b.txt" />
+    <Content Include="MaximalTourismSample_1a.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MaximalTourismSample_1.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="nunit" Version="3.11.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.11.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
@@ -14,6 +40,21 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MaximalTourism\MaximalTourism.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="MaximalTourismSample_1e.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="MaximalTourismSample_1d.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="MaximalTourismSample_1c.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="MaximalTourismSample_1b.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

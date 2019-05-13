@@ -11,8 +11,8 @@ namespace MaximalTourism
         {
             int[] cityAssigment = new int[maxCities + 1];
 
-            var groupCount = new List<int>(maxCities / 10) { 0 };
-            var groupParrent = new List<int>(maxCities / 10) { 0 };
+            var groupCount = new List<int>() { 0 };
+            var groupParrent = new List<int>() { 0 };
 
             var newGroupId = 0;
 
@@ -65,14 +65,61 @@ namespace MaximalTourism
                     continue;
                 }
 
-                //re-assign all to parent group A
-                groupCount[parentGroupA] += groupCount[parentGroupB];
-                groupCount[parentGroupB] = 0;
+                var groupToAssign = Math.Min(parentGroupA, parentGroupB);
+                var groupToDitch = Math.Max(parentGroupA, parentGroupB);
 
-                groupParrent[cityAssigment[cityB]] = parentGroupA;
-                cityAssigment[cityB] = parentGroupA;
-                groupParrent[parentGroupB] = parentGroupA;
+
+
+                //re-assign all to parent group A
+                groupCount[groupToAssign] += groupCount[groupToDitch];
+                groupCount[groupToDitch] = 0;
+
+                groupParrent[cityAssigment[cityB]] = groupToAssign;
+                cityAssigment[cityB] = groupToAssign;
+                groupParrent[groupToDitch] = groupToAssign;
             }
+
+            //var citiesToCheck = new int[] { 62561, 49173, 16371, 17061, 46641, 32369, 48501, 20081, 11949, 23681, 54101, 8364, 13537, 9411, 13357, 261, 58221, 35753, 52943, 53529, 46246, 47525, 24166, 19337, 57521, 7031, 15191, 6887, 13439, 15816 };
+
+            //var groupsToCheck = new List<int>();
+            //foreach(var city in citiesToCheck)
+            //{
+            //    groupsToCheck.Add(cityAssigment[city]);
+            //}
+
+            //compress groups
+
+            for (int i = 0; i < groupCount.Count; ++i)
+            {
+                if (groupCount[i] > 0)
+                {
+                    var currentGroup = i;
+                    var currentParent = groupParrent[i];
+                    var total = groupCount[i];
+
+                    while (currentGroup != currentParent)
+                    {
+                        groupCount[currentGroup] = 0;
+                        currentGroup = currentParent;
+                        currentParent = groupParrent[currentGroup];
+
+                        total += groupCount[currentGroup];
+                    }
+
+                    groupCount[currentGroup] = total;
+                }
+            }
+
+            var groupCheck = new List<int>();
+            for (int i = 0; i < groupCount.Count; ++i)
+            {
+                if (groupCount[i] > 0 &&
+                    i != groupParrent[i])
+                {
+                    groupCheck.Add(i);
+                }
+            }
+
 
             return groupCount.Max();
         }
