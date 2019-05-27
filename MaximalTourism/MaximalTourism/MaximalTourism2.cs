@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Diagnostics;
 
 namespace MaximalTourism
 {
@@ -9,12 +10,10 @@ namespace MaximalTourism
     {
         public int CalculateMaxConnections(int maxCities, int[][] args)
         {
-            int[] cityAssigment = new int[maxCities + 1];
+            CityGroup[] cityAssigment = new CityGroup[maxCities + 1];
+            var allGroups = new List<CityGroup>();
 
-            var groupCount = new List<int>() { 0 };
-            var groupParrent = new List<int>() { 0 };
-
-            var newGroupId = 0;
+            int groupId = 1;
 
             for (int ci = 0; ci < args.Length; ++ci)
             {
@@ -22,31 +21,37 @@ namespace MaximalTourism
                 var cityB = args[ci][1];
 
                 //no groups assigned
-                if (cityAssigment[cityA] == 0 && cityAssigment[cityB] == 0)
+                if (cityAssigment[cityA] == null && cityAssigment[cityB] == null)
                 {
-                    newGroupId++;
-                    cityAssigment[cityA] = newGroupId;
-                    cityAssigment[cityB] = newGroupId;
-                    groupCount.Add(cityA == cityB ? 1 : 2);
-                    groupParrent.Add(newGroupId);
+                    var cityGroup = new CityGroup(groupId++);
+
+                    cityGroup.AddCity(cityA);
+                    if (cityA != cityB)
+                    {
+                        cityGroup.AddCity(cityB);
+                    }
+
+                    cityAssigment[cityA] = cityAssigment[cityB] = cityGroup;
+                    allGroups.Add(cityGroup);
+
                     continue;
                 }
 
                 //A not assigned, B assigned
-                if (cityAssigment[cityA] == 0 && cityAssigment[cityB] != 0)
+                if (cityAssigment[cityA] == null && cityAssigment[cityB] != null)
                 {
-                    var parentGroup = groupParrent[cityAssigment[cityB]];
-                    cityAssigment[cityA] = cityAssigment[cityB] = parentGroup;
-                    groupCount[parentGroup]++;
+                    cityAssigment[cityB].AddCity(cityA);
+                    cityAssigment[cityA] = cityAssigment[cityB];
+
                     continue;
                 }
 
                 //A assigned, B not assigned
-                if (cityAssigment[cityA] != 0 && cityAssigment[cityB] == 0)
+                if (cityAssigment[cityA] != null && cityAssigment[cityB] == null)
                 {
-                    var parentGroup = groupParrent[cityAssigment[cityA]];
-                    cityAssigment[cityA] = cityAssigment[cityB] = parentGroup;
-                    groupCount[parentGroup]++;
+                    cityAssigment[cityA].AddCity(cityB);
+                    cityAssigment[cityB] = cityAssigment[cityA];
+
                     continue;
                 }
 
@@ -55,73 +60,51 @@ namespace MaximalTourism
                 {
                     continue;
                 }
-
-                var parentGroupA = groupParrent[cityAssigment[cityA]];
-                var parentGroupB = groupParrent[cityAssigment[cityB]];
-
-                //same parent assigment
-                if (parentGroupA == parentGroupB)
-                {
-                    continue;
-                }
-
-                var groupToAssign = Math.Min(parentGroupA, parentGroupB);
-                var groupToDitch = Math.Max(parentGroupA, parentGroupB);
-
-
-
+                                
                 //re-assign all to parent group A
-                groupCount[groupToAssign] += groupCount[groupToDitch];
-                groupCount[groupToDitch] = 0;
-
-                groupParrent[cityAssigment[cityB]] = groupToAssign;
-                cityAssigment[cityB] = groupToAssign;
-                groupParrent[groupToDitch] = groupToAssign;
+                cityAssigment[cityA].ConvertToSubGroup(cityAssigment[cityB]);
             }
 
-            //var citiesToCheck = new int[] { 62561, 49173, 16371, 17061, 46641, 32369, 48501, 20081, 11949, 23681, 54101, 8364, 13537, 9411, 13357, 261, 58221, 35753, 52943, 53529, 46246, 47525, 24166, 19337, 57521, 7031, 15191, 6887, 13439, 15816 };
+            return allGroups.Max(g => g.Count);
+        }
 
-            //var groupsToCheck = new List<int>();
-            //foreach(var city in citiesToCheck)
-            //{
-            //    groupsToCheck.Add(cityAssigment[city]);
-            //}
+        [DebuggerDisplay("Id: {GroupId} ({Count}), Parent Id: {TopLevel.GroupId} ({TopLevel.Count}) ")]
+        private class CityGroup
+        {
+            public int GroupId { get; }
+            public int Count { get; set; }
+            public CityGroup TopLevel { get; set; }
 
-            //compress groups
-
-            for (int i = 0; i < groupCount.Count; ++i)
+            public CityGroup(int groupId)
             {
-                if (groupCount[i] > 0)
-                {
-                    var currentGroup = i;
-                    var currentParent = groupParrent[i];
-                    var total = groupCount[i];
-
-                    while (currentGroup != currentParent)
-                    {
-                        groupCount[currentGroup] = 0;
-                        currentGroup = currentParent;
-                        currentParent = groupParrent[currentGroup];
-
-                        total += groupCount[currentGroup];
-                    }
-
-                    groupCount[currentGroup] = total;
-                }
+                GroupId = groupId;
+                TopLevel = this;
+                Count = 0;
             }
 
-            var groupCheck = new List<int>();
-            for (int i = 0; i < groupCount.Count; ++i)
+            public void AddCity(int city)
             {
-                if (groupCount[i] > 0 &&
-                    i != groupParrent[i])
-                {
-                    groupCheck.Add(i);
-                }
+                TopLevel.Count++;
             }
 
+            public void ConvertToSubGroup(CityGroup subGroup)
+            {
 
-            return groupCount.Max();
+                if ( TopLevel == subGroup || TopLevel == subGroup.TopLevel )
+                {
+                    return;
+                }
+
+                //set subgroup parent
+                TopLevel.Count += subGroup.TopLevel.Count;
+                subGroup.TopLevel.Count = 0;
+                subGroup.TopLevel.TopLevel = TopLevel;
+
+                //set subgroup
+                TopLevel.Count += subGroup.Count;
+                subGroup.Count = 0;
+                subGroup.TopLevel = TopLevel;
+            }
         }
     }
 }
