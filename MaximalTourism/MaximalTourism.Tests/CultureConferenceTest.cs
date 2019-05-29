@@ -33,5 +33,21 @@ namespace MaximalTourism.Tests
 
             Assert.AreEqual(expectedResult, result);
         }
+
+        [TestCase("CultureConferenceSample_1.txt", 7039)]
+        [TestCase("CultureConferenceSample_2.txt", 5571)]
+        public void UsesSampleInput(string fileName, int expectedREsult)
+        {
+            var filePath = Path.Combine(TestContext.CurrentContext.TestDirectory, fileName);
+
+            var allText = File.ReadAllText(filePath).Split(Environment.NewLine);
+            var a = allText.Skip(1)
+                .Select(l => Array.ConvertAll(l.Split(" "), Int32.Parse))
+                .ToArray();
+
+            var result = CultureConference.getMinimumEmployees(a);
+
+            Assert.AreEqual(expectedREsult, result);
+        }
     }
 }

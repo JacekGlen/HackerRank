@@ -57,4 +57,13 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="CultureConferenceSample_2.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="CultureConferenceSample_1.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
