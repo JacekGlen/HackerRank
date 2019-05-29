@@ -12,42 +12,72 @@ namespace MaximalTourism
             //0 - do nothing
             //1 - optional
             //2 - mandatory
-            var conferenceSchedule = new int[e.Length + 1];
+            var conferenceSchedule = new int[e.Length];
 
             for (int idx = e.Length - 1; idx >= 0; --idx)
             {
-                //node healthy - skip
+                var parentIdx = ToIndex(e[idx][0]);
+
+                //node healthy - check out with parent and skip
                 if (e[idx][1] == 1)
                 {
+                    if (parentIdx != -1 && conferenceSchedule[idx] == 2 && conferenceSchedule[parentIdx] == 0)
+                    {
+                        conferenceSchedule[parentIdx] = 1;
+                    }
+
                     continue;
                 }
 
-                var parentIdx = ToIndex(e[idx][0]);
-
-                //parent healthy (or CEO)
-                if (e[idx][0] == 0 || e[parentIdx][1] == 1)
+                //if parent CEO
+                if (e[idx][0] == 0)
                 {
-                    //mark current as mandatory, only if not marked as optional earlier
-                    if (conferenceSchedule[idx] != 1)
+                    if (conferenceSchedule[idx] == 0)
                     {
                         conferenceSchedule[idx] = 2;
                     }
 
+                    continue;
                 }
-                else
+
+                ////parent healthy (or CEO)
+                //if (e[idx][0] == 0 || e[parentIdx][1] == 1)
+                //{
+                //    //mark current as mandatory, only if not marked as optional earlier
+                //    if (conferenceSchedule[idx] == 0)
+                //    {
+                //        conferenceSchedule[idx] = 2;
+                //    }
+
+                //}
+                //else
                 //parent sick
+
+                if (conferenceSchedule[parentIdx] == 2)
                 {
-                    //already marked as mandatory, then parent optional
-                    if (conferenceSchedule[idx] == 2)
+                    continue;
+                }
+
+                if (conferenceSchedule[idx] == 1)
+                {
+                    continue;
+                }
+
+                //already marked as mandatory, then parent optional
+                if (conferenceSchedule[idx] == 2)
+                {
+                    if (conferenceSchedule[parentIdx] == 0)
                     {
                         conferenceSchedule[parentIdx] = 1;
                     }
-                    else
-                    //not mandatory, then set to optional but parent mandatory
-                    {
-                        conferenceSchedule[idx] = 1;
-                        conferenceSchedule[parentIdx] = 2;
-                    }
+                    continue;
+                }
+
+
+                //not mandatory, then set to optional but parent mandatory
+                {
+                    conferenceSchedule[idx] = 1;
+                    conferenceSchedule[parentIdx] = 2;
                 }
             }
 
